@@ -1,4 +1,4 @@
-import hashlib
+from sha256 import calcular_sha256
 import operator
 
 def hmac(key, message):
@@ -13,7 +13,6 @@ def hmac(key, message):
 
   outerKeyPadding = bytes(map(operator.xor, key, [0x5c] * blockSize))
   innerKeyPadding = bytes(map(operator.xor, key, [0x36] * blockSize))
-
   innerHash = bytes(calcular_sha256(innerKeyPadding + message), "utf-8")
   outerHash = calcular_sha256(outerKeyPadding + innerHash)
 

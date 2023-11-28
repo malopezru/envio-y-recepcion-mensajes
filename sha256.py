@@ -90,5 +90,3 @@ datos = "todos gays"
 
 # Calcular el hash SHA-256
 hash_resultado = calcular_sha256(datos.encode('utf-8'))
-
-print("El hash SHA-256 es:", hash_resultado)

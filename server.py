@@ -1,39 +1,58 @@
-import select
 import socket
-from queue import Queue
+import threading
 
-# Crear un socket servidor
+def handle_client(client_socket, username):
+    while True:
+        try:
+            # Receive data from the client
+            data = client_socket.recv(1024).decode('utf-8')
+            if not data:
+                break
+
+            # Broadcast the received data to all clients
+            broadcast(f'{data}'.encode('utf-8'))
+
+        except Exception as e:
+            print(f"Error handling client {username}: {e}")
+            break
+
+    # Remove the client from the list
+    remove_client(client_socket)
+    client_socket.close()
+
+def broadcast(message):
+    for client in clients:
+        client.send(message)
+
+def remove_client(client_socket):
+    if client_socket in clients:
+        clients.remove(client_socket)
+
+# Server configuration
+host = '127.0.0.1'
+port = 12345
+
+# Create a socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(('localhost', 8080))
-server_socket.listen(5)
+server_socket.bind((host, port))
+server_socket.listen(2)  # Allow up to 2 clients
 
-# Crear una cola de prioridad para encolar las solicitudes
-queue = Queue()
+print(f"Server listening on {host}:{port}")
 
-# Lista de sockets para selección
-sockets_list = [server_socket]
+clients = []
 
 while True:
-    # Seleccionar sockets disponibles para lectura, escritura, errores
-    read_sockets, _, _ = select.select(sockets_list, [], [])
+    # Accept a new client connection
+    client_socket, addr = server_socket.accept()
+    print(f"Accepted connection from {addr}")
 
-    for sock in read_sockets:
-        # Nueva conexión entrante
-        if sock == server_socket:
-            client_socket, addr = server_socket.accept()
-            IP, port = client_socket.getpeername()
-            sockets_list.append(client_socket)
+    # Get the username from the client
+    username = client_socket.recv(1024).decode('utf-8')
+    clients.append(client_socket)
 
-        # Datos disponibles en un socket existente
-        else:
-            # Recibir los datos
-            data = sock.recv(1024)
-            if data:
-                queue.put(data)  # Ajustar el nivel de prioridad
+    # Send a welcome message to the new client
+    client_socket.send(f"Welcome, {username}!".encode('utf-8'))
 
-
-    # Procesar las solicitudes en la cola de prioridad (las de mayor prioridad primero)
-    while not queue.empty():
-        ver_message = queue.get() #recibe llave publica, mensaje y mensaje encriptado
-
-
+    # Start a new thread to handle the client
+    client_thread = threading.Thread(target=handle_client, args=(client_socket, username))
+    client_thread.start()
