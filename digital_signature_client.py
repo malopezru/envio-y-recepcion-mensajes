@@ -24,6 +24,7 @@ def send_messages():
             if message == "verify":
                 original_message = input("Enter Message received: ")
                 signature = input("Enter Signature received: ")
+                public_key = input("Enter public_key received: ")
                 if verify_signature(original_message, int(signature), public_key, module):
                     print("Message is authentic")
                 else:
