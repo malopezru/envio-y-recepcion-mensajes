@@ -84,9 +84,3 @@ def calcular_sha256(datos):
     hash_resultado = f"{h0:08x}{h1:08x}{h2:08x}{h3:08x}{h4:08x}{h5:08x}{h6:08x}{h7:08x}"
 
     return hash_resultado
-
-# Tu texto o datos para los que deseas calcular el SHA
-datos = "todos gays"
-
-# Calcular el hash SHA-256
-hash_resultado = calcular_sha256(datos.encode('utf-8'))
